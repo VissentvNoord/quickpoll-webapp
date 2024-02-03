@@ -1,4 +1,3 @@
-
 interface PollOptionProps{
     options: string[];
     setOptions: React.Dispatch<React.SetStateAction<string[]>>; 
@@ -15,19 +14,24 @@ const PollOption: React.FC<PollOptionProps> = ({ options, setOptions, optionValu
         setOptions(updatedOptions);
     }
 
-    const onOptionLeave = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const onOptionUnfocus = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const inputValue : string = e.target.value;
         
         if(inputValue == ""){
-            const updatedOptions = options.filter((_, i) => i !== index);
-            setOptions(updatedOptions);
+            removeOption();
         }
     } 
+
+    const removeOption = () => {
+        const updatedOptions = options.filter((_, i) => i !== index);
+        setOptions(updatedOptions);
+    }
 
 
     return (
         <div>
-            <input type="text" value={optionValue} key={index} onBlur={(e) => onOptionLeave(e, index)} onChange={(e) => onOptionChange(e, index)} />
+            <input type="text" value={optionValue} key={index} onBlur={(e) => onOptionUnfocus(e, index)} onChange={(e) => onOptionChange(e, index)} />
+            <button onClick={removeOption}>Remove</button>
         </div>
     )
 }
