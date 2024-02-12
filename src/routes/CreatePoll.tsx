@@ -1,10 +1,14 @@
 import React, { useEffect } from "react";
-import { useState } from "react";
-import PollOption from "../components/PollOption";
-import createPollRequest from "../components/CreatePollRequest";
+import { useState, useRef } from "react";
+import PollOption from "../components/CreatorPollOption";
+import createPollRequest from "../requests/createPollRequest";
+import '../styles/createpoll.css';
+import { useNavigate } from "react-router-dom";
 
 //To do: Redirect user to poll when creation is successful, if not give error message
 const NewPoll: React.FC = () => {
+    const navigate = useNavigate();
+
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<boolean>(false);
 
@@ -13,14 +17,39 @@ const NewPoll: React.FC = () => {
     const [newOption, setNewOption] = useState<string>("");
 
     useEffect(() => {
-        if (loading) {
-            createPollRequest({ setLoading, setError, title, options });
+
+        async function onPollCreated() {
+            try {
+                const response = await createPollRequest({ setLoading, setError, title, options }).then(res => {
+                    return res;
+                })
+                .catch((e) => {
+                    console.error(e);
+                });
+
+                console.log(response);
+                if(response.id){
+                    navigate("/" + response.id);
+                }
+            } catch (e) {
+                console.error("Error: ", e);
+            }
         }
 
-    }, [loading]);
+        if (loading) {
+            onPollCreated();
+        }
+
+        if (newOption !== "") {
+            addNewOption();
+        }
+
+    }, [loading, newOption]);
 
     const newOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue: string = e.target.value;
+
+        console.log(inputValue)
         setNewOption(inputValue);
     }
 
@@ -47,8 +76,8 @@ const NewPoll: React.FC = () => {
         setTitle(inputValue);
     }
 
-    if(loading){
-        return(
+    if (loading) {
+        return (
             <div>
                 Loading
             </div>
@@ -56,17 +85,24 @@ const NewPoll: React.FC = () => {
     }
 
     return (
-        <div className="create-poll">
+        <div className="form-grid create-poll">
+            <p>Question/Title</p>
             <input type="text" placeholder="Question/Title" onChange={onTitleChange} />
+
+            <p>Responses</p>
             {
                 options.map((option, index) => (
-                    <PollOption key={index} options={options} setOptions={setOptions} optionValue={option} index={index} />
+                    <PollOption
+                        key={index}
+                        options={options}
+                        setOptions={setOptions}
+                        optionValue={option}
+                        index={index}
+                    />
                 ))
             }
-            <div>
-                <input type="text" onChange={newOptionChange} placeholder="Type new option here" value={newOption} />
-                <button onClick={addNewOption}>Add</button>
-            </div>
+
+            <input type="text" onInput={newOptionChange} placeholder="Type new response here" value={newOption} />
             <button onClick={onCreatePoll}>Create</button>
         </div>
     );

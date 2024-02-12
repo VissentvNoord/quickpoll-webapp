@@ -1,0 +1,8 @@
+.create-poll {
+    width: 500px;
+}
+
+.created-options{
+    display: grid;
+    grid-template-columns: 1fr 20px;
+}
